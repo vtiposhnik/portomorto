@@ -12,3 +12,12 @@ These checks require interactive Godot on a desktop. They are **not marked passe
 8. Repeat at sandbox `world_scale` 0.5 and 1.5 and adjust `camera_zoom`. Confirm dimensions, collisions, jump arcs, and portal apertures remain proportional.
 
 Record engine version, OS, frame cap, reproduction coordinates, portal normals, and observed velocities for any failure. Do not infer success from an open window or idle scene alone.
+
+## v0.3 combat checks (desktop playtest pending)
+
+- Approach each enemy: check pursuit/range, melee cooldown, and aimed ranged shots. Stand behind a wall to confirm attacks cannot originate through it.
+- Fire at enemies, push a crate into them gently (no impact damage), then launch a crate with a floor-to-wall portal (impact damage). Knock an enemy into either endpoint and observe AI resume after exit.
+- Place portals to intercept a ranged attack and send it back toward its shooter. Enemy shots remain physical and can damage other enemies.
+- Drop an enemy onto the hazard or from a large height. Ordinary walking and jumping should not deal impact damage; hard landings should.
+- Hold Focus during attacks and portal replacement. Observe player health and the brief invulnerability window, then test death, automatic respawn, and manual reset during combat.
+- Check repeated impacts after separation and long continuous contact for duplicate damage. Dense stacks and simultaneous impacts need further desktop stress testing; this iteration does not claim those cases exhaustively verified.

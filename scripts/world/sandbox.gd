@@ -10,6 +10,8 @@ var player: PlayerController
 @export var debug_enabled: bool = true
 var emitter: ProjectileEmitter
 var time_control: TimeControl
+var respawn_left: float = -1.0
+@export var respawn_delay: float = 0.8
 
 func _ready() -> void:
 	wall(Vector2(700, 650), Vector2(2400, 100))
@@ -24,12 +26,39 @@ func _ready() -> void:
 	player.position = Vector2(150, 540) * world_scale
 	WorldUnits.resize_body(player, world_scale)
 	add_child(player)
+	player.died.connect(func(): respawn_left = respawn_delay)
 	for property: String in ["max_speed", "acceleration", "deceleration", "air_drag", "gravity", "jump_speed", "push_force"]:
 		player.movement.set(property, player.movement.get(property) * world_scale)
 	var crate: RigidBody2D = CRATE.instantiate()
 	crate.position = Vector2(360, 540) * world_scale
 	WorldUnits.resize_body(crate, world_scale)
 	add_child(crate)
+	for entry in [["melee_enemy", Vector2(850,540)], ["ranged_enemy", Vector2(1320,540)]]:
+		var enemy: EnemyMotor = load("res://scenes/entities/"+entry[0]+".tscn").instantiate()
+		enemy.position = entry[1] * world_scale
+		WorldUnits.resize_body(enemy,world_scale)
+		enemy.speed *= world_scale
+		enemy.gravity *= world_scale
+		add_child(enemy)
+	var extra: RigidBody2D = CRATE.instantiate()
+	extra.position = Vector2(1100,100)*world_scale
+	WorldUnits.resize_body(extra,world_scale)
+	add_child(extra)
+	var hazard := Area2D.new()
+	hazard.set_script(preload("res://scripts/combat/hazard.gd"))
+	hazard.position = Vector2(1000,590)*world_scale
+	hazard.collision_layer = 0
+	hazard.collision_mask = 38
+	var hazard_shape := CollisionShape2D.new()
+	var rectangle := RectangleShape2D.new()
+	rectangle.size = Vector2(130,20)*world_scale
+	hazard_shape.shape = rectangle
+	hazard.add_child(hazard_shape)
+	var hazard_visual := BodyVisual.new()
+	hazard_visual.size = rectangle.size
+	hazard_visual.color = Color("e53535")
+	hazard.add_child(hazard_visual)
+	add_child(hazard)
 	var target: StaticBody2D = TARGET.instantiate()
 	target.position = Vector2(1700, 564) * world_scale
 	WorldUnits.resize_body(target, world_scale)
@@ -80,7 +109,7 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("reset"):
 		get_tree().reload_current_scene()
-	if event.is_action_pressed("fire"):
+	if event.is_action_pressed("fire") and not player.dead:
 		var direction: Vector2 = (get_global_mouse_position() - player.global_position).normalized()
 		var projectile: RigidBody2D = ProjectileEmitter.PROJECTILE.instantiate()
 		projectile.position = player.global_position + direction * 30.0 * world_scale
@@ -88,7 +117,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		WorldUnits.resize_body(projectile, world_scale)
 		add_child(projectile)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	if respawn_left >= 0.0:
+		respawn_left -= delta
+		if respawn_left <= 0.0:
+			get_tree().reload_current_scene()
+			return
 	if player.position.y > 1400.0 * world_scale:
 		get_tree().reload_current_scene()
 

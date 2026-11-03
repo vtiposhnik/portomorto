@@ -1,0 +1,32 @@
+[gd_scene load_steps=7 format=3]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_motor.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/presentation/body_visual.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/components/portal_traveller.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/components/health.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/components/impact_damage.gd" id="impact"]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_brain.gd" id="brain"]
+[sub_resource type="RectangleShape2D" id="Shape"]
+size = Vector2(32, 48)
+[node name="Enemy" type="CharacterBody2D"]
+collision_layer = 32
+collision_mask = 55
+script = ExtResource("1")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Shape")
+[node name="Visual" type="Node2D" parent="."]
+script = ExtResource("2")
+size = Vector2(32, 48)
+color = Color(0.7, 0.4, 0.9, 1)
+circular = false
+[node name="PortalTraveller" type="Node" parent="."]
+script = ExtResource("3")
+[node name="Health" type="Node" parent="."]
+script = ExtResource("4")
+maximum = 80.0
+[node name="ImpactDamage" type="Node" parent="."]
+script = ExtResource("impact")
+[node name="Brain" type="Node" parent="."]
+script = ExtResource("brain")
+style = 1
+attack_range = 550.0
+attack_interval = 1.5

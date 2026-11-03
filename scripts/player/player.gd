@@ -6,8 +6,15 @@ extends CharacterBody2D
 var coyote_left: float = 0.0
 var jump_left: float = 0.0
 var jumped: bool = false
+var dead: bool = false
+signal died
 
 func _ready() -> void:
+	add_to_group("player")
+	$Health.depleted.connect(func():
+		dead = true
+		velocity = Vector2.ZERO
+		died.emit())
 	if movement == null:
 		movement = MovementSettings.new()
 
@@ -15,6 +22,8 @@ func apply_impulse(impulse: Vector2) -> void:
 	velocity += impulse
 
 func _physics_process(delta: float) -> void:
+	if dead:
+		return
 	step(delta, Input.get_axis("move_left", "move_right"),
 		Input.is_action_just_pressed("jump"), Input.is_action_pressed("jump"))
 
@@ -41,11 +50,14 @@ func step(delta: float, axis: float, jump_pressed: bool, jump_held: bool) -> voi
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, (movement.deceleration if is_on_floor() else movement.air_drag) * delta)
 	var before: Vector2 = global_position
+	var incoming: Vector2 = velocity
 	move_and_slide()
+	$ImpactDamage.character_contacts(self, incoming)
 	var result: Dictionary = traveller.resolve_motion(before, global_position, velocity)
 	if not result.is_empty():
 		global_position = result.position
 		velocity = result.velocity
+		$ImpactDamage.previous_velocity = velocity
 		coyote_left = 0.0
 	for index in get_slide_collision_count():
 		var collision: KinematicCollision2D = get_slide_collision(index)

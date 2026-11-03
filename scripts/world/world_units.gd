@@ -15,3 +15,12 @@ static func resize_body(body: PhysicsBody2D, factor: float) -> void:
 		visual.size *= factor
 	if body is RigidBody2D:
 		body.gravity_scale *= factor
+	var impact: ImpactDamage = body.get_node_or_null("ImpactDamage")
+	if impact:
+		impact.threshold *= factor
+		impact.damage_per_speed /= factor
+	var brain: Node = body.get_node_or_null("Brain")
+	if brain:
+		for property: String in ["detection_range", "attack_range", "knockback", "projectile_speed"]:
+			brain.set(property, brain.get(property) * factor)
+	body.set_meta("world_scale", factor)

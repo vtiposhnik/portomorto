@@ -153,6 +153,8 @@ func run() -> void:
 	time.set_focus(false)
 	check(Engine.time_scale == 1.0, "focus restores normal speed")
 	var health: HealthComponent = player.get_node("Health")
+	health.current = health.maximum
+	health.invulnerability_left = 0.0
 	var before: Vector2 = player.velocity
 	Damage.deliver(player,DamageEvent.new(12,Vector2(100,-200)))
 	check(health.current == 88 and player.velocity.is_equal_approx(before+Vector2(100,-200)), "central damage applies health and knockback")
