@@ -122,6 +122,14 @@ func _ready() -> void:
 	lab_emitter.world_scale = world_scale
 	lab_emitter.speed *= world_scale
 	add_child(lab_emitter)
+	var lab := Node2D.new()
+	lab.set_script(preload("res://scripts/environment/interaction_lab.gd"))
+	lab.world_scale = world_scale
+	add_child(lab)
+	label_at(Vector2(1800,690),"B: BARRELS / BARRIER")
+	label_at(Vector2(2170,690),"C: PLATE / SWITCH / DOORS")
+	label_at(Vector2(2730,690),"D: PLATFORM / CRUSHER / FIELD")
+	label_at(Vector2(30,690),"A: E GRAB / LMB THROW")
 	label_at(Vector2(2400,660),"ACCELERATION RUNWAY / VERTICAL LAUNCH SHAFT")
 	label_at(Vector2(-80, 660), "MOMENTUM RUNWAY")
 	label_at(Vector2(480, 430), "FLOOR / CEILING TRANSFER")

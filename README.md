@@ -1,4 +1,4 @@
-# Portomorto — v0.4 Advanced Portal Mechanics
+# Portomorto — v0.5 Interactive Environments
 
 A Godot 4.6 / GDScript side-view mechanics sandbox: responsive movement, two oriented portals, rigid crates, portal-capable projectiles, Focus time control, melee/ranged enemies, health, impact damage, hazards, and automatic respawn. No external assets, plugins, or dependencies.
 
@@ -13,13 +13,39 @@ Import `project.godot` with Godot **4.6.x**, then press **F6** in `scenes/sandbo
 | Left / right mouse | Place or replace portal A / B |
 | Hold Shift | Focus: simulation runs at 20%; aiming and camera use real time |
 | F | Fire a projectile toward the mouse |
-| Q / E | Select portal A / B for exit-effect configuration |
+| Q / T | Select portal A / B for exit-effect configuration |
+| E | Grab nearby eligible object / use nearest switch; release if carrying |
+| Left mouse while carrying | Throw toward cursor (consumes Portal A placement input) |
 | 1 / 2 / 3 | Standard / Accelerator / Rotator on selected portal |
 | Mouse wheel up / down | Rotate selected Rotator +15° / −15° |
 | R | Reset the entire sandbox |
 | F3 | Toggle debug text and vectors |
 
 Slate rectangles accept portals on any sufficiently large face. Green preview means placement is valid; red means rejected. A single portal is dim and solid until paired. White flashes indicate transit. The far-right automatic emitter shoots a stationary damageable target; its health is shown in the overlay. Reset restores its health. Crates are amber, the player mint, and targets red.
+
+## Interactive environments
+
+The original combat and portal laboratory now includes four sections in the same room:
+
+- **A — manipulation:** the starting crate and portal surfaces. E grabs the nearest eligible object or uses the nearest switch in reach, with line-of-sight checks. E releases a held object. Left click throws while carrying; otherwise left click still places Portal A. Right click always places B. **Portal B configuration moved from E to T**; Q configures A.
+- **B — explosives:** two red barrels and a destructible barrier near the right-hand entrance. Shoot a barrel, strike it hard, throw it through portals, or trigger a chain reaction. The barrier accepts projectile, explosion and impact damage.
+- **C — mechanisms:** a pressure plate, crate, switch and two doors. The plate OR switch opens the first door; the switch also controls the second. Doors stop if their swept path is occupied and continue after it clears. Switches can also be shot.
+- **D — hazards:** a waypoint platform, descending crusher, spikes and a lethal field. The crusher damages on its descending underside and reverses on contact, rather than driving a body through the floor.
+
+**R** restarts every interaction. Health, death/respawn, Focus, enemy combat and all portal modifiers remain available. All new graphics are primitive shapes; explosions show only a short translucent circle.
+
+### Reusable components and scenes
+
+`scenes/environment/` contains barrels, barriers, plates, switches, doors, platforms, crusher, spikes and lethal-area scenes. `scripts/environment/interaction_lab.gd` only lays out and wires the example room. Reuse these scenes in other rooms; none of their scripts names a particular door, switch or enemy.
+
+- `Carryable` adds a rigid body to the `carryable` group. `ObjectInteraction` on the player accepts bodies in that group with a centered `CollisionShape2D` and mass in the exported range (0.1–8 by default). Frozen bodies are ineligible. The hold uses a damped spring with capped acceleration and gravity compensation; a shape sweep clips the target to available space, and normal rigid-body collision/CCD remains active. No per-frame position or velocity teleport is used. The held body temporarily ignores the carrier; collision is restored after release once their shapes separate. Re-grabbing cancels pending restoration. Transit by either participant and player death release the spring. Cross-portal carrying is deliberately not simulated.
+- Throwing adds a mass-scaled impulse in the aim direction, preserving existing momentum. Carry distance, reach, spring/damping, acceleration limit and throw speed are exported. Input-stage handling consumes E and carried left-click before portal placement's unhandled-input stage. All bindings are editable in Input Map. A switch is selected ahead of a crate only if it is nearer.
+- `Explosive` listens to the existing Health depletion signal (barrels have 20 health), then queues a single guarded detonation. Radius, force, damage and collision mask are exported. Damage and impulse fall off linearly with center distance. Force applies independently of health/invulnerability; damage uses the shared contract without a duplicate impulse. Chain reactions use deferred calls, never recursive damage stacks. The separate feedback component owns the brief circle.
+- `Destructible` listens to Health depletion, disables its shape at the safe deferred boundary, and removes the obstacle. Barriers are not portal surfaces, preventing dangling endpoints on deleted geometry. No debris is spawned.
+- Plates sum rigid-body mass and optionally equivalent character mass, with optional group filtering. They emit `activation_changed(source, active)` only on transitions. Removed and multiple simultaneous bodies are handled by current overlaps. Switches emit the same signal; their projectile/impact activation can be disabled and has a simulation-time cooldown.
+- `MechanismDoor.receive_activation` keeps weak per-source states. OR is the default; `require_all` provides AND across registered inputs. Register each source initially with its current state when using AND. Any number of signals can connect to any number of devices. Opening and closing speeds are separate exports. Both directions use swept and overlap checks against the obstruction mask.
+- `MovingPlatform` uses `AnimatableBody2D`, physics-tick motion, exported local waypoints, speed, and loop/ping-pong modes. Godot transfers platform motion to characters and rigid objects. **Moving platforms, doors and crushers reject portal placement**, even if mistakenly added to the portal-surface group. Portals remain supported on surrounding stationary surfaces.
+- Hazards share the existing Area2D damage script with configurable damage, interval, impulse, collision mask, optional target group and lethal mode. Spikes use timed contact damage; the crusher adds a descending underside condition; the field applies maximum-health damage. All honor the central health invulnerability rules, including lethal areas. Damaging contact rearms after its interval in simulation time.
 
 ## Portal effects
 
@@ -81,10 +107,11 @@ godot --headless --editor --import --quit
 godot --headless --script tests/run.gd
 godot --headless --script tests/combat.gd
 godot --headless --script tests/effects.gd
+godot --headless --script tests/environment.gd
 godot --headless --quit-after 360
 ```
 
-v0.4 verification uses Godot 4.6.3 on Linux. The **67 foundation regression checks pass**, and **22 combat checks pass in the current regression run**. Editor import completed without script errors and the sandbox ran 900 frames without runtime errors. The **29 effect checks pass at 30 and 144 FPS caps**, including per-body acceleration, signed rotations, independent live configuration, blocked directions, Focus, capped chaining, high-speed exit collision, and increased impact damage. The combat suite exercises attacks, damage rejection/recovery, enemy death, portal knockback, relative-speed impacts, hazards, redirected enemy fire, Focus combat, and automatic room respawn. These are automated results, not desktop playtest results.
+v0.5 verification uses Godot 4.6.3 on Linux. The **67 foundation regression checks pass**, and **22 combat checks pass in the current regression run**. Editor import completed without script errors and the sandbox ran 1200 frames without runtime errors. The **29 effect checks pass**, including per-body acceleration, signed rotations, independent live configuration, blocked directions, Focus, capped chaining, high-speed exit collision, and increased impact damage. The combat suite exercises attacks, damage rejection/recovery, enemy death, portal knockback, relative-speed impacts, hazards, redirected enemy fire, Focus combat, and automatic room respawn. The **49 environment checks pass**, covering physical carrying/throwing, mass and obstruction rules, portal-modified cargo, explosions/chains, barrier destruction, aggregate pressure, multi-device signals, door obstruction, waypoint transport, hazards, and Focus. That is **167 checks across four suites**. These are automated results, not desktop playtest results.
 
 The test runner exits nonzero on assertion failures. It exercises actual Godot physics bodies, not just formulas: movement, floor/ceiling collisions, jump buffering/coyote time, external momentum, crate pushing, oriented velocity transforms, player/crate/projectile transit, projectile damage and knockback after transit, blocked exits, invalid placement, back-face collision, aperture recovery, rotated surfaces, repeated chaining, Focus input/transit, world scale, and scene reset.
 
@@ -94,6 +121,8 @@ See [manual validation](tests/MANUAL.md) for keyboard/mouse and visual acceptanc
 
 ## Known limits
 
+- Explosion queries consider at most 128 overlapping physics shapes per blast and do not model wall occlusion. Dense piles, very heavy objects and extreme-speed compression need further stress testing.
+- Door obstruction is conservative: a body on top or touching its sweep can prevent opening as well as closing. Released cargo may temporarily ignore the player until they separate; it continues colliding with world geometry.
 - Desktop visual/input feel and Windows export have not been manually validated in this headless environment. Automated input and physics checks do not substitute for those checks.
 - Portal surfaces must be stationary rectangles with a centered `CollisionShape2D`; travellers currently support centered circles and upright rectangles. Moving portals, compound/polygon shapes, spinning crates, and scaled body transforms are outside the current scope.
 - Transit is atomic when the center crosses; there is no split-body rendering or view through a portal. A partially inserted shape can visually overlap its supporting surface briefly.

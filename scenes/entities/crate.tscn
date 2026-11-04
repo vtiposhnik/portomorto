@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/components/portal_traveller.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/components/health.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/components/impact_damage.gd" id="impact"]
+[ext_resource type="Script" path="res://scripts/components/carryable.gd" id="carry"]
 [sub_resource type="RectangleShape2D" id="Shape"]
 size = Vector2(36, 36)
 [sub_resource type="PhysicsMaterial" id="Material"]
@@ -33,3 +34,5 @@ script = ExtResource("3")
 script = ExtResource("4")
 [node name="ImpactDamage" type="Node" parent="."]
 script = ExtResource("impact")
+[node name="Carryable" type="Node" parent="."]
+script = ExtResource("carry")

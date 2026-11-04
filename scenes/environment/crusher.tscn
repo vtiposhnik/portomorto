@@ -1,0 +1,24 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://scripts/environment/moving_platform.gd" id="logic"]
+[ext_resource type="Script" path="res://scripts/presentation/body_visual.gd" id="visual"]
+[ext_resource type="PackedScene" path="res://scenes/environment/spikes.tscn" id="hazard"]
+[sub_resource type="RectangleShape2D" id="shape"]
+size = Vector2(140,24)
+[node name="platform" type="AnimatableBody2D"]
+collision_layer = 1
+collision_mask = 63
+script = ExtResource("logic")
+waypoints = PackedVector2Array(0,0,0,160)
+speed = 80.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("shape")
+[node name="Visual" type="Node2D" parent="."]
+script = ExtResource("visual")
+size = Vector2(140,24)
+color = Color(0.5,0.6,0.8,1)
+[node name="CrushSensor" parent="." instance=ExtResource("hazard")]
+position = Vector2(0,18)
+damage = 100.0
+impulse = Vector2(0,0)
+crushing_only = true

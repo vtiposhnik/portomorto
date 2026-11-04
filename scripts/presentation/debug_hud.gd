@@ -25,7 +25,7 @@ func _ready() -> void:
 	add_child(title)
 	var controls := Label.new()
 	controls.position = Vector2(24, 48)
-	controls.text = "A/D  Move     Space  Jump     LMB/RMB  Portals     Shift  Focus     F  Fire     R  Reset     F3  Debug"
+	controls.text = "A/D  Move     Space  Jump     LMB/RMB  Portals     Shift  Focus     F  Fire     E  Grab/use     R  Reset     F3  Debug"
 	add_child(controls)
 	effect_text = Label.new()
 	effect_text.position = Vector2(24, 96)
@@ -55,4 +55,6 @@ func _process(_delta: float) -> void:
 			info.text += "\n%s: %s  sleeping=%s  transits=%d" % [traveller.body.name, traveller.get_velocity().round(), traveller.body.sleeping, traveller.teleport_count]
 	status.text = "FOCUS  •  20% simulation" if time_control.focused else "Place two portals on slate surfaces. Green preview = valid. Red = blocked."
 	status.text += "   |   HP %.0f / %.0f%s" % [player.get_node("Health").current, player.get_node("Health").maximum, "  DEAD — resetting" if player.dead else ""]
+	if is_instance_valid(player.get_node("Interaction").held):
+		status.text = "CARRYING — LMB throw / E release   |   HP %.0f" % player.get_node("Health").current
 	status.modulate = Color("bd86ff") if time_control.focused else Color("93a6b8")

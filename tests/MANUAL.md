@@ -24,8 +24,18 @@ Record engine version, OS, frame cap, reproduction coordinates, portal normals, 
 
 ## v0.4 effects checks (desktop playtest pending)
 
-- Configure A and B independently with Q/E and 1/2/3; confirm placement persists and HUD identifies the selected **exit** effect. Rebind one key and the wheel actions in Input Map.
+- Configure A and B independently with Q/T and 1/2/3; confirm placement persists and HUD identifies the selected **exit** effect. Rebind one key and the wheel actions in Input Map.
 - During Focus, select, switch, rotate in both directions, place/reposition portals, then release Focus. Check live mouse and HUD responsiveness.
 - Compare standard and accelerated floor→wall, ceiling→floor, wall→wall and tilted-surface launches. Repeat with player, both enemies, crate and projectile; verify the cap under repeated boosts.
 - Send a projectile through a ±15°/30° Rotator into a target. Try an inward/tangent angle: traversal should be blocked, including at rest. Switch to an unsafe angle while an object is partly inserted and check recovery.
 - Use the right-hand runway and high ceiling for high-speed launches. Compare crate collision damage before and after acceleration, then redirect enemy fire. Test crowded exits and near-edge approaches; one swept traversal per physics update remains the supported limit.
+
+## v0.5 environment checks (desktop playtest pending)
+
+- Grab, aim, swing, release and re-grab a crate with E. Throw with left click and confirm no A portal is placed by the same click. Check mass limits, wall/ceiling contact, and quick mouse reversals. Right click must still place B. T now selects B for configuration.
+- Carry during Focus, throw through accelerator/rotator portals, and cross a portal while carrying (the object is released). Check player collision restoration after a close drop.
+- Shoot and strike barrels; observe single detonations, radial forces and bounded chain reactions. Send a barrel through a portal and use explosions to launch crates. Damage barriers with shots, blasts and impacts, then walk through the cleared space.
+- Put multiple bodies on a plate, remove them one at a time, destroy one, and teleport one onto it. Use a switch to open both doors. Block a closing door with a crate; remove it and verify closing resumes. Check AND configuration after registering all source states.
+- Ride platforms in both path modes and place crates on them. Attempt portal placement on a platform/door/crusher: it must be rejected. Test surrounding stationary portals.
+- Test spikes, descending crusher strike/retreat, and the lethal field against player and enemies. Try contact during invulnerability and Focus. Confirm death/reset restores all mechanisms and objects.
+- Repeat at world scales 0.5 and 1.5. Pay particular attention to carried-object collision margins, crusher sensors and crowded doorway cases.

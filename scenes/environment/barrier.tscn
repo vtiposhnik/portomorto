@@ -1,0 +1,22 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://scripts/environment/destructible.gd" id="logic"]
+[ext_resource type="Script" path="res://scripts/presentation/body_visual.gd" id="visual"]
+[ext_resource type="Script" path="res://scripts/components/health.gd" id="health"]
+[ext_resource type="Script" path="res://scripts/environment/destructible.gd" id="destroy"]
+[sub_resource type="RectangleShape2D" id="shape"]
+size = Vector2(32,120)
+[node name="barrier" type="StaticBody2D"]
+collision_layer = 1
+collision_mask = 63
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("shape")
+[node name="Visual" type="Node2D" parent="."]
+script = ExtResource("visual")
+size = Vector2(32,120)
+color = Color(0.7,0.5,0.3,1)
+[node name="Health" type="Node" parent="."]
+script = ExtResource("health")
+maximum = 60.0
+[node name="Destructible" type="Node" parent="."]
+script = ExtResource("destroy")

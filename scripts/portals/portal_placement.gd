@@ -25,7 +25,7 @@ func candidate(origin: Vector2, aim: Vector2, index: int) -> Dictionary:
 	if hit.is_empty():
 		return {}
 	var result: Dictionary = {"position": hit.position, "normal": hit.normal, "surface": hit.collider, "valid": false}
-	if not hit.collider.is_in_group("portal_surfaces"):
+	if not hit.collider.is_in_group("portal_surfaces") or hit.collider is AnimatableBody2D:
 		return result
 	var wall := hit.collider as StaticBody2D
 	var collision: CollisionShape2D = wall.get_node_or_null("CollisionShape2D")

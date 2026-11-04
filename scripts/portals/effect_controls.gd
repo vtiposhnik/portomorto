@@ -34,4 +34,4 @@ func description() -> String:
 		label = "Accelerator %.1fx (cap %.0f)" % [effect.multiplier,effect.maximum_speed]
 	elif effect is RotatorEffect:
 		label = "Rotator %+.0f°" % effect.angle_degrees
-	return "Configure %s exit: %s   |   Q/E select   1/2/3 effect   Wheel rotate" % ["A" if selected == 0 else "B",label]
+	return "Configure %s exit: %s   |   Q/T select   1/2/3 effect   Wheel rotate" % ["A" if selected == 0 else "B",label]

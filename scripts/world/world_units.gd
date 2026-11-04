@@ -24,3 +24,7 @@ static func resize_body(body: PhysicsBody2D, factor: float) -> void:
 		for property: String in ["detection_range", "attack_range", "knockback", "projectile_speed"]:
 			brain.set(property, brain.get(property) * factor)
 	body.set_meta("world_scale", factor)
+	var interaction: Node = body.get_node_or_null("Interaction")
+	if interaction:
+		for property: String in ["reach","hold_distance","maximum_acceleration","throw_speed"]:
+			interaction.set(property,interaction.get(property)*factor)
