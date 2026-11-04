@@ -39,3 +39,15 @@ Record engine version, OS, frame cap, reproduction coordinates, portal normals, 
 - Ride platforms in both path modes and place crates on them. Attempt portal placement on a platform/door/crusher: it must be rejected. Test surrounding stationary portals.
 - Test spikes, descending crusher strike/retreat, and the lethal field against player and enemies. Try contact during invulnerability and Focus. Confirm death/reset restores all mechanisms and objects.
 - Repeat at world scales 0.5 and 1.5. Pay particular attention to carried-object collision margins, crusher sensors and crowded doorway cases.
+
+## v0.6 three-room route (desktop playtest pending)
+
+Use F5 (`scenes/game.tscn`), not F6 on an individual room scene.
+
+1. Room 1: inspect the gap and ledges. Walk toward the end of the near landing, link the floor beneath you to the far wall, and enter A. Confirm the green exit advances to Room 2. On another run, try the far-floor shortcut near the exit. A normal jump across the gap should fail and restart Room 1.
+2. Room 2: E grabs the crate; aim above/right while carrying. Drop it centered over the plate, wait for the door, and jump over the crate. Confirm the plate requires the crate, not the player. Try relocating the crate with portals, then R to restore the puzzle.
+3. Room 3: defeat both enemies with F, Focus and/or environmental interactions. Try moving or throwing the crate, detonating the barrel, redirecting shots and using the spikes. The exit must stay locked while either enemy is alive. After clearing the arena, pass the spike strip and enter the exit to see completion.
+4. In every room, hold Shift while aiming and configuring portals. Check camera tracking, preview visibility, readable objective/health text and the E/T controls. Resize the window. Verify death and R restore the current room, not Room 1, including objects and portal effects.
+5. Rebind a control, transition and restart; the binding should persist. Carry an object when restarting and confirm there is no leftover collision exception or duplicated player/portal system. At completion there should be no active actors or slow time; R starts a fresh Room 1.
+
+Do not mark desktop usability or alternate creative solutions passed based solely on the scripted route. Record any stuck crates, obscured placement targets, unexpected gate states or exit/death timing issues during playtesting.

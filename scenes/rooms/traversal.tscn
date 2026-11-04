@@ -1,0 +1,5 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://scripts/rooms/room.gd" id="room"]
+[node name="Traversal" type="Node2D"]
+script = ExtResource("room")
+room_index = 0

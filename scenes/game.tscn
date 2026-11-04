@@ -1,0 +1,4 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://scripts/rooms/room_manager.gd" id="manager"]
+[node name="Game" type="Node"]
+script = ExtResource("manager")

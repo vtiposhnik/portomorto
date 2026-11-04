@@ -1,10 +1,10 @@
-# Portomorto — v0.5 Interactive Environments
+# Portomorto — v0.6 Three-Room Prototype
 
 A Godot 4.6 / GDScript side-view mechanics sandbox: responsive movement, two oriented portals, rigid crates, portal-capable projectiles, Focus time control, melee/ranged enemies, health, impact damage, hazards, and automatic respawn. No external assets, plugins, or dependencies.
 
 ## Run
 
-Import `project.godot` with Godot **4.6.x**, then press **F6** in `scenes/sandbox.tscn` or **F5** to run the project. Windows desktop is the intended target; development validation currently uses Godot 4.6.3 on Linux. A Windows executable requires the matching official Godot export templates; no binary is included.
+Import `project.godot` with Godot **4.6.x** and press **F5** to play Room 1 → Room 2 → Room 3 → Completion. The main scene is `scenes/game.tscn`. The original mechanics lab remains available: open `scenes/sandbox.tscn` and press **F6**. Individual room scenes are composed by the game manager; use F5 for their full transition/death flow. Windows desktop is the intended target; development validation currently uses Godot 4.6.3 on Linux. A Windows executable requires the matching official Godot export templates; no binary is included.
 
 | Control | Action |
 |---|---|
@@ -18,10 +18,28 @@ Import `project.godot` with Godot **4.6.x**, then press **F6** in `scenes/sandbo
 | Left mouse while carrying | Throw toward cursor (consumes Portal A placement input) |
 | 1 / 2 / 3 | Standard / Accelerator / Rotator on selected portal |
 | Mouse wheel up / down | Rotate selected Rotator +15° / −15° |
-| R | Reset the entire sandbox |
+| R | Restart current room; on completion, begin again at Room 1 |
 | F3 | Toggle debug text and vectors |
 
 Slate rectangles accept portals on any sufficiently large face. Green preview means placement is valid; red means rejected. A single portal is dim and solid until paired. White flashes indicate transit. The far-right automatic emitter shoots a stationary damageable target; its health is shown in the overlay. Reset restores its health. Crates are amber, the player mint, and targets red.
+
+## Three-room experience
+
+**Room 1 — Portal Traversal:** A 340-unit gap is wider than a normal jump, even from the nearby elevated ledge. Walk near the end of the starting landing, place A on the floor under your feet and B on the far wall facing the landing, and fall through A. The exit is green. Optional shortcut: place B on the far floor close to the exit instead. Both routes use normal placement and crossing rules; no frame-perfect timing is required.
+
+**Room 2 — Physics Puzzle:** Approach the crate, press E, and carry it toward the plate while aiming slightly above/right. Stop just left of the plate, aim above its center, and press E to drop the crate. Wait for the door to open, then **jump over the crate** so it stays on the plate. Characters and projectiles cannot activate this plate. The exit remains locked until the crate supplies the required mass, even if you bypass the physical door using portals. The room has a continuous floor, ceiling and side walls to keep the crate recoverable; R restores it immediately if needed.
+
+**Room 3 — Combat Arena:** Defeat the melee and ranged enemy, then enter the green exit. F fires at the mouse. The crate, barrel, spikes, ledge and portal surfaces offer alternative approaches. One verified route is to move the crate out of the firing lane, use jump shots and Focus to defeat the enemies, then jump over the spike strip on the way out. The exit stays locked while either enemy lives.
+
+The completion screen offers R to play again. Death restarts only the current room with full health and fresh objects. The room number, health, objective, effect configuration and restart hint are always visible. Controls are unchanged from v0.5 (E interaction, Q/T effect selection).
+
+### Room lifecycle
+
+`RoomManager` owns one room instance at a time and a small completion overlay. Three scene resources in `scenes/rooms/` configure the layouts built by `PrototypeRoom`. It composes the existing player, enemy, portal, interaction, camera, hazard and mechanism components; their gameplay scripts are unchanged.
+
+Room exits emit a signal only when their objective is satisfied and the living player overlaps the exit. Transitions/restarts are deferred and guarded against duplicates. The old room is disabled and freed before the next one is created, so projectiles, health, held objects, mechanism states, hazard cooldowns, portal endpoints and effect Resources cannot leak between rooms. The camera immediately targets the fresh player. Focus is released and normal time restored; press Shift again in the new room to resume Focus. Input Map bindings are never reconstructed or erased.
+
+The standalone sandbox keeps its previous reset behavior and all v0.1–v0.5 testing sections. It is separate from the three-room sequence.
 
 ## Interactive environments
 
@@ -108,10 +126,13 @@ godot --headless --script tests/run.gd
 godot --headless --script tests/combat.gd
 godot --headless --script tests/effects.gd
 godot --headless --script tests/environment.gd
+godot --headless --script tests/playthrough.gd
 godot --headless --quit-after 360
 ```
 
-v0.5 verification uses Godot 4.6.3 on Linux. The **67 foundation regression checks pass**, and **22 combat checks pass in the current regression run**. Editor import completed without script errors and the sandbox ran 1200 frames without runtime errors. The **29 effect checks pass**, including per-body acceleration, signed rotations, independent live configuration, blocked directions, Focus, capped chaining, high-speed exit collision, and increased impact damage. The combat suite exercises attacks, damage rejection/recovery, enemy death, portal knockback, relative-speed impacts, hazards, redirected enemy fire, Focus combat, and automatic room respawn. The **49 environment checks pass**, covering physical carrying/throwing, mass and obstruction rules, portal-modified cargo, explosions/chains, barrier destruction, aggregate pressure, multi-device signals, door obstruction, waypoint transport, hazards, and Focus. That is **167 checks across four suites**. These are automated results, not desktop playtest results.
+v0.6 verification uses Godot 4.6.3 on Linux. **196 checks pass across five suites**: 67 foundation, 22 combat, 29 portal effects, 49 environment and 29 room/playthrough checks. The playthrough executes movement, ray-validated portal placement, physical carrying/releasing, projectiles, actual exit overlaps, death and restart. It does not teleport the player across rooms, force puzzle flags or kill enemies directly to complete the route. Separate reset checks deliberately damage entities before verifying fresh room state.
+
+The headless playthrough sets a 1280×720 window so simulated mouse events match the camera's coordinate transform. It verifies both Room 1 routes, repeats the crate puzzle after restart, fights the arena, reaches completion, checks Focus/camera/control persistence, and verifies arena restoration after death and manual restart. Editor import and main-scene launch are also checked. These are automated results; desktop visual usability and Windows export remain unverified.
 
 The test runner exits nonzero on assertion failures. It exercises actual Godot physics bodies, not just formulas: movement, floor/ceiling collisions, jump buffering/coyote time, external momentum, crate pushing, oriented velocity transforms, player/crate/projectile transit, projectile damage and knockback after transit, blocked exits, invalid placement, back-face collision, aperture recovery, rotated surfaces, repeated chaining, Focus input/transit, world scale, and scene reset.
 
