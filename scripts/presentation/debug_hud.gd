@@ -7,6 +7,8 @@ var system: PortalSystem
 var visuals: PortalVisuals
 var time_control: TimeControl
 var target: StaticBody2D
+var effect_controls: PortalEffectControls
+var effect_text: Label
 var info: Label
 var status: Label
 
@@ -25,8 +27,11 @@ func _ready() -> void:
 	controls.position = Vector2(24, 48)
 	controls.text = "A/D  Move     Space  Jump     LMB/RMB  Portals     Shift  Focus     F  Fire     R  Reset     F3  Debug"
 	add_child(controls)
+	effect_text = Label.new()
+	effect_text.position = Vector2(24, 96)
+	add_child(effect_text)
 	info = Label.new()
-	info.position = Vector2(24, 108)
+	info.position = Vector2(24, 134)
 	info.add_theme_font_size_override("font_size", 15)
 	add_child(info)
 	status = Label.new()
@@ -35,6 +40,8 @@ func _ready() -> void:
 	add_child(status)
 
 func _process(_delta: float) -> void:
+	if effect_controls:
+		effect_text.text = effect_controls.description()
 	if Input.is_action_just_pressed("debug"):
 		debug_enabled = not debug_enabled
 	visuals.debug_enabled = debug_enabled

@@ -14,14 +14,17 @@ var respawn_left: float = -1.0
 @export var respawn_delay: float = 0.8
 
 func _ready() -> void:
-	wall(Vector2(700, 650), Vector2(2400, 100))
+	wall(Vector2(1450, 650), Vector2(3900, 100))
 	wall(Vector2(-450, 250), Vector2(100, 800))
-	wall(Vector2(1850, 200), Vector2(100, 900))
+	wall(Vector2(3400, 0), Vector2(100, 1400))
 	wall(Vector2(650, 400), Vector2(340, 36))
 	wall(Vector2(1120, 200), Vector2(320, 36))
 	wall(Vector2(700, -100), Vector2(700, 50))
 	wall(Vector2(1450, 430), Vector2(50, 340))
 	wall(Vector2(120, 280), Vector2(220, 36), -0.3)
+	# Open runway and vertical launch shaft beyond the original combat room.
+	wall(Vector2(2700,-650),Vector2(1100,50))
+	wall(Vector2(2200,100),Vector2(260,36),0.35)
 	player = PLAYER.instantiate()
 	player.position = Vector2(150, 540) * world_scale
 	WorldUnits.resize_body(player, world_scale)
@@ -67,7 +70,11 @@ func _ready() -> void:
 	system.exit_margin *= world_scale
 	for endpoint: PortalEndpoint in system.endpoints:
 		endpoint.half_length *= world_scale
+	system.set_meta("world_scale",world_scale)
 	add_child(system)
+	var effect_controls := PortalEffectControls.new()
+	effect_controls.system = system
+	add_child(effect_controls)
 	var placement := PortalPlacement.new()
 	placement.range_limit *= world_scale
 	placement.edge_margin *= world_scale
@@ -94,6 +101,7 @@ func _ready() -> void:
 	emitter_visual.color = Color("efca6c")
 	emitter.add_child(emitter_visual)
 	var hud := DebugHUD.new()
+	hud.effect_controls = effect_controls
 	hud.player = player
 	hud.system = system
 	hud.visuals = visuals
@@ -101,6 +109,20 @@ func _ready() -> void:
 	hud.target = target
 	hud.debug_enabled = debug_enabled
 	add_child(hud)
+	var lab_crate: RigidBody2D = CRATE.instantiate()
+	lab_crate.position = Vector2(2400,560)*world_scale
+	WorldUnits.resize_body(lab_crate,world_scale)
+	add_child(lab_crate)
+	var lab_target: StaticBody2D = TARGET.instantiate()
+	lab_target.position = Vector2(3200,564)*world_scale
+	WorldUnits.resize_body(lab_target,world_scale)
+	add_child(lab_target)
+	var lab_emitter := ProjectileEmitter.new()
+	lab_emitter.position = Vector2(2500,450)*world_scale
+	lab_emitter.world_scale = world_scale
+	lab_emitter.speed *= world_scale
+	add_child(lab_emitter)
+	label_at(Vector2(2400,660),"ACCELERATION RUNWAY / VERTICAL LAUNCH SHAFT")
 	label_at(Vector2(-80, 660), "MOMENTUM RUNWAY")
 	label_at(Vector2(480, 430), "FLOOR / CEILING TRANSFER")
 	label_at(Vector2(1490, 660), "PROJECTILE / DAMAGE RANGE")

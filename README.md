@@ -1,4 +1,4 @@
-# Portomorto — v0.3 Functional Combat
+# Portomorto — v0.4 Advanced Portal Mechanics
 
 A Godot 4.6 / GDScript side-view mechanics sandbox: responsive movement, two oriented portals, rigid crates, portal-capable projectiles, Focus time control, melee/ranged enemies, health, impact damage, hazards, and automatic respawn. No external assets, plugins, or dependencies.
 
@@ -13,10 +13,25 @@ Import `project.godot` with Godot **4.6.x**, then press **F6** in `scenes/sandbo
 | Left / right mouse | Place or replace portal A / B |
 | Hold Shift | Focus: simulation runs at 20%; aiming and camera use real time |
 | F | Fire a projectile toward the mouse |
+| Q / E | Select portal A / B for exit-effect configuration |
+| 1 / 2 / 3 | Standard / Accelerator / Rotator on selected portal |
+| Mouse wheel up / down | Rotate selected Rotator +15° / −15° |
 | R | Reset the entire sandbox |
 | F3 | Toggle debug text and vectors |
 
 Slate rectangles accept portals on any sufficiently large face. Green preview means placement is valid; red means rejected. A single portal is dim and solid until paired. White flashes indicate transit. The far-right automatic emitter shoots a stationary damageable target; its health is shown in the overlay. Reset restores its health. Crates are amber, the player mint, and targets red.
+
+## Portal effects
+
+Each endpoint independently owns an **exit effect**: configuring B changes travel from A to B; configuring A changes travel from B to A. Effect changes preserve existing placements. Configuration text remains visible with F3 debugging disabled. All new controls are editable in Project Settings → Input Map and operate immediately during Focus.
+
+- **Standard** is the default (no effect Resource). Existing coordinate transforms and speed preservation remain unchanged.
+- **Accelerator** multiplies transformed velocity by 1.5, capped at 2400 units/second by default. `AcceleratorEffect` exports both values. Its cap scales with sandbox world units. The cap can reduce an already-faster entrant; this is an explicit stability limit, not controller braking.
+- **Rotator** rotates transformed velocity by a signed angle while preserving speed. Wheel up is +15° (clockwise in Godot's y-down world); wheel down is −15°. Angles wrap at ±180°. It rotates the actual standard exit vector, not just the surface normal.
+
+Angles that produce inward or tangent exit velocity are **rejected**: the entrance stays solid rather than reflecting or silently clamping the requested angle. Direction validation also handles resting entrants. An effect change that invalidates an in-progress entry recovers that body to the entrance's safe side. A geometrically valid green placement preview does not guarantee a particular velocity/rotation can traverse it.
+
+The right-hand laboratory contains a long runway, high ceiling for vertical launches, a tilted platform, a crate, a target, and a projectile emitter. Configure B as Accelerator, place A under a falling crate and B on a wall facing a target, then compare standard and accelerated impacts. The original combat room remains available.
 
 ## Combat sandbox
 
@@ -55,7 +70,7 @@ This is a rotation that maps inward to outward and preserves speed. The tangenti
 
 Per-body exceptions open the supporting wall only while the body fits the aperture and its exit is clear. Other geometry remains collidable. An obstructed exit keeps the entrance solid. If clearance changes or a partly inserted body moves out of the aperture, it is recovered to the front before wall collision resumes. Replacing an occupied aperture is rejected until the body clears it.
 
-To add a later portal effect, derive a small resource from `PortalEffect`, override `modify(result)`, and assign it to an endpoint's `effect`. The result has `position` and `velocity`; exit clearance is checked after modification. Ordinary portals have no effect resource. There are no speculative effect types or genre systems.
+To add an effect, derive a Resource from `PortalEffect`, override `modify(result)`, and assign it to an endpoint's `effect`. The result contains `position`, `velocity`, and `motion` (the unspent displacement already transformed into exit coordinates). Apply the same speed/direction changes to velocity and motion. Implement this as a pure transform: clearance prediction may call it repeatedly, including a unit-vector probe for resting bodies; never mutate entities or retain traversal state in the Resource. Only the central resolver commits a traversal and emits its signal. The exit position is checked after modification and the modified remainder is swept against solid geometry. Ordinary portals have no effect Resource; additional effects need no new body-specific teleport code.
 
 ## Automated verification
 
@@ -65,10 +80,11 @@ From the repository root:
 godot --headless --editor --import --quit
 godot --headless --script tests/run.gd
 godot --headless --script tests/combat.gd
+godot --headless --script tests/effects.gd
 godot --headless --quit-after 360
 ```
 
-v0.3 verification uses Godot 4.6.3 on Linux. The **67 foundation regression checks pass**, and **22 combat checks pass at 30 and 144 FPS caps**. Editor import completed without script errors and the sandbox ran 900 frames without runtime errors. The combat suite exercises attacks, damage rejection/recovery, enemy death, portal knockback, relative-speed impacts, hazards, redirected enemy fire, Focus combat, and automatic room respawn. These are automated results, not desktop playtest results.
+v0.4 verification uses Godot 4.6.3 on Linux. The **67 foundation regression checks pass**, and **22 combat checks pass in the current regression run**. Editor import completed without script errors and the sandbox ran 900 frames without runtime errors. The **29 effect checks pass at 30 and 144 FPS caps**, including per-body acceleration, signed rotations, independent live configuration, blocked directions, Focus, capped chaining, high-speed exit collision, and increased impact damage. The combat suite exercises attacks, damage rejection/recovery, enemy death, portal knockback, relative-speed impacts, hazards, redirected enemy fire, Focus combat, and automatic room respawn. These are automated results, not desktop playtest results.
 
 The test runner exits nonzero on assertion failures. It exercises actual Godot physics bodies, not just formulas: movement, floor/ceiling collisions, jump buffering/coyote time, external momentum, crate pushing, oriented velocity transforms, player/crate/projectile transit, projectile damage and knockback after transit, blocked exits, invalid placement, back-face collision, aperture recovery, rotated surfaces, repeated chaining, Focus input/transit, world scale, and scene reset.
 
@@ -79,9 +95,9 @@ See [manual validation](tests/MANUAL.md) for keyboard/mouse and visual acceptanc
 ## Known limits
 
 - Desktop visual/input feel and Windows export have not been manually validated in this headless environment. Automated input and physics checks do not substitute for those checks.
-- Portal surfaces must be stationary rectangles with a centered `CollisionShape2D`; travellers currently support centered circles and upright rectangles. Moving portals, compound/polygon shapes, spinning crates, and scaled body transforms are outside v0.1.
+- Portal surfaces must be stationary rectangles with a centered `CollisionShape2D`; travellers currently support centered circles and upright rectangles. Moving portals, compound/polygon shapes, spinning crates, and scaled body transforms are outside the current scope.
 - Transit is atomic when the center crosses; there is no split-body rendering or view through a portal. A partially inserted shape can visually overlap its supporting surface briefly.
 - Placement conservatively rejects nearby endpoints by center distance, including some nonoverlapping corner configurations. Occupied endpoints must clear before replacement.
 - One crossing is resolved per body update; high-speed projectiles use CCD and exit motion is swept, but arbitrary extreme speeds and multiple portals crossed within one physics tick are not guaranteed.
 - The stationary test target still remains after depletion; enemies disappear on death. Crates remain physical objects after their health is depleted.
-- Enemy navigation is intentionally limited: horizontal pursuit, range checks, and attack line-of-sight. Enemies do not plan jumps, find paths around walls, or understand portals. Progression, alternate portal effects, and advanced movement remain absent.
+- Enemy navigation is intentionally limited: horizontal pursuit, range checks, and attack line-of-sight. Enemies do not plan jumps, find paths around walls, or understand portals. Progression, additional weapons, and advanced movement remain absent.

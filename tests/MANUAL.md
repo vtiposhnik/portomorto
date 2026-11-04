@@ -21,3 +21,11 @@ Record engine version, OS, frame cap, reproduction coordinates, portal normals, 
 - Drop an enemy onto the hazard or from a large height. Ordinary walking and jumping should not deal impact damage; hard landings should.
 - Hold Focus during attacks and portal replacement. Observe player health and the brief invulnerability window, then test death, automatic respawn, and manual reset during combat.
 - Check repeated impacts after separation and long continuous contact for duplicate damage. Dense stacks and simultaneous impacts need further desktop stress testing; this iteration does not claim those cases exhaustively verified.
+
+## v0.4 effects checks (desktop playtest pending)
+
+- Configure A and B independently with Q/E and 1/2/3; confirm placement persists and HUD identifies the selected **exit** effect. Rebind one key and the wheel actions in Input Map.
+- During Focus, select, switch, rotate in both directions, place/reposition portals, then release Focus. Check live mouse and HUD responsiveness.
+- Compare standard and accelerated floor→wall, ceiling→floor, wall→wall and tilted-surface launches. Repeat with player, both enemies, crate and projectile; verify the cap under repeated boosts.
+- Send a projectile through a ±15°/30° Rotator into a target. Try an inward/tangent angle: traversal should be blocked, including at rest. Switch to an unsafe angle while an object is partly inserted and check recovery.
+- Use the right-hand runway and high ceiling for high-speed launches. Compare crate collision damage before and after acceleration, then redirect enemy fire. Test crowded exits and near-edge approaches; one swept traversal per physics update remains the supported limit.
